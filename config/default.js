@@ -1,6 +1,11 @@
 const config = {
     cache: {
-        capacity: 10,
+        capacity: -1,
+    },
+    vendor: {
+        ipgeolocation: {
+            rate: 5,
+        },
     },
 };
 
