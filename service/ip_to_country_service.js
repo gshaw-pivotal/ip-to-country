@@ -20,9 +20,9 @@ exports.convertIPToCountry = async function (ip) {
 }
 
 insertIntoCache = function (ip, country) {
-    // Check if the cache is at capacity
-    if (cache.size < cacheConfig.capacity) {
-        // Cache is not at capacity, so add
+    // Check if the cache is at capacity or see if it is set to unlimited size
+    if (cacheConfig.capacity === -1 || cache.size < cacheConfig.capacity) {
+        // Cache is not at capacity (or is unlimited capacity), so add
         cache.set(ip, country);
     } else {
         // Cache is at capacity, so randomly remove a record to make room
