@@ -1,7 +1,10 @@
-var express = require('express');
-var app = express();
-var {validationResult, body} = require('express-validator');
-var bodyParser = require('body-parser')
+const express = require('express');
+const app = express();
+const {validationResult, body, matchedData} = require('express-validator');
+const bodyParser = require('body-parser');
+
+const service = require("../service/ip_to_country_service")
+
 app.use( bodyParser.json() );
 app.use(bodyParser.urlencoded({  extended: true }));
 
@@ -16,7 +19,8 @@ app.post('/country', checkIPToCountryRequest(), function (req, res) {
     }
 
     // The request has passed validation checks
-    return res.status(200).send('OK').end();
+    const result = service.convertIPToCountry(matchedData(req).ip);
+    return res.status(200).json(result).end();
 })
 
 exports.app = app;
