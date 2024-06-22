@@ -10,7 +10,7 @@ app.use(bodyParser.urlencoded({  extended: true }));
 
 const checkIPToCountryRequest = () => body('ip').trim().isIP();
 
-app.post('/country', checkIPToCountryRequest(), function (req, res) {
+app.post('/country', checkIPToCountryRequest(), async function (req, res) {
     const errors = validationResult(req);
 
     // The request has failed validation checks, return bad request and the errors
@@ -19,7 +19,7 @@ app.post('/country', checkIPToCountryRequest(), function (req, res) {
     }
 
     // The request has passed validation checks
-    const result = service.convertIPToCountry(matchedData(req).ip);
+    const result = await service.convertIPToCountry(matchedData(req).ip);
     return res.status(200).json(result).end();
 })
 
