@@ -14,9 +14,13 @@ exports.convertIPToCountry = async function (ip) {
     }
 
     // IP not in cache, so ask vendor to convert and add result to cache
-    let country = await ipgeolocation.convert(ip);
-    insertIntoCache(ip, country)
-    return new IPCountryModel(ip, country);
+    try {
+        let country = await ipgeolocation.convert(ip);
+        insertIntoCache(ip, country)
+        return new IPCountryModel(ip, country);
+    } catch (error) {
+        throw error;
+    }
 }
 
 insertIntoCache = function (ip, country) {
