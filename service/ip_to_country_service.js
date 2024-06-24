@@ -1,6 +1,6 @@
 const config = require('config');
 
-const IPCountryModel = require('../model/IPCountryModel');
+const IPCountryModel = require('../model/ip_to_country_model');
 const ipgeolocation = require('../vendors/ipgeolocation/convert')
 
 const cacheConfig = config.get('cache');
