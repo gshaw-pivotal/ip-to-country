@@ -57,6 +57,7 @@ The cache capacity can be set to be unlimited (in practice eventually memory siz
     },
 ```
 
+### Fixed Size Cache
 A specific capacity can be set by providing an integer value like in the following example:
 ```
     cache: {
@@ -65,3 +66,66 @@ A specific capacity can be set by providing an integer value like in the followi
 ```
 
 In the above example, when the cache is full and the application wants to insert a new record it will randomly select a record to evict, freeing up space for the new entry.
+
+## Vendors
+This application uses one or more vendors to provide IP address to country translation.
+
+### Adding a New Vendor
+A new vendor to provide IP address to country translation can be added by following this guideline:
+- Add a subdirectory to the `vendors` module.
+- Within your subdirectory create a Javascript file named `convert.js` and within that add and export / expose a function called `convert` that takes a string holding the IP address to be translated and will return a string holding the country name that is associated with that IP address. See below for example code skeleton.
+```js
+exports.convert = async function (ip) {
+}
+```
+- In `vendor_list.js` add an import to your vendor, similar to the following:
+```js
+const <unique_name_for_your_vendor> = require('../vendors/<your_subdirectory_name>/convert')
+```
+- Then within the same file, add your vendor to the existing `vendorList` array in the form `<unique_name_for_your_vendor>.convert`. The list reads from top to bottom, so the earlier / higher in the list a vendor is the higher its priority is. The application will always call the first vendor in the list and will fall through to the next one(s) if there is a problem.
+  - For rate limiting your vendor, there are a couple of approaches:
+    - Keep it all internal within your vendor submodule. With this approach you are fully responsible for handling everything related to rate limiting.
+    - Use the `vendor_helper.js` function `canMakeCall(callHistory, rateLimit)`. Here you would pass an array holding Date (date and time) objects / references of previous calls and an integer representing how many calls to the vendor are allowed per hour. The `canMakeCall` function will return a boolean indicating if the call can be made to the vendor. If the number of previous calls has reached the rate limit, the function will check to see if the oldest call is an hour or more old, and if so remove it from the history, allowing this call to proceed.
+      - Under this approach you are responsible for providing a suitable array to hold the Dates of the previous calls, and having a rate limit value.
+    - Optional: You can use the `config/default.js` file to hold the rate limit for your vendor so that updating it is easy in the future. Add an object for the following form to the `vendor` object key (see existing entries in said file as a guide):
+      ```js
+      vendor: {
+          ...,
+          <unique_name_for_your_vendor>: {
+              rate: 5,
+          },
+          ...,
+      },
+      ```
+      Then within your vendor module you can use the following to get the rate limit so that you can use it within vendor module or pass it to the `vendor_helper`:
+      ```js
+      const config = require("config");
+      const vendorConfig = config.get('vendor.<unique_name_for_your_vendor>');
+      let rateLimit = vendorConfig.rate;
+      ```
+
+### Rate Limiting
+Each vendor can be rate limited (number of requests per hour).
+
+If you use the `canMakeCall` function within `vendor/vendor_helper.js` then a value of -1 will be seen as being an unlimited rate, and no rate limiting will be applied. Any other value will restrict the number of calls to the given vendor to no more than that number in the last hour (60 minutes).
+
+The rate limit for a vendor can be set / configured within `config/default.js`. Each vendor can be configured individually by having an entry under the `vendor` key. See the following as an example:
+```js
+vendor: {
+    ...,
+    <unique_name_for_your_vendor>: {
+        rate: <rate_limit_as_an_integer>,
+    },
+    ...,
+},
+```
+So for example, if your vendor's unique name is `foovendor` and you wanted the rate limit to be 10 calls within the last hour (60 minutes) you would add the following:
+```js
+vendor: {
+    ...,
+    foovender: {
+        rate: 10,
+    },
+    ...,
+},
+```

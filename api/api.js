@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 
 const service = require("../service/ip_to_country_service")
 const RateLimitExceededError = require("../error/rate_limit_exceeded_error");
+const ServiceError = require("../error/service_error");
 const VendorError = require("../error/vendor_error");
 
 app.use( bodyParser.json() );
@@ -31,6 +32,11 @@ app.post('/country', checkIPToCountryRequest(), async function (req, res) {
             return res.status(429).json({errors: error.message});
         }
         if (error instanceof VendorError) {
+            // The vendor(s) encountered a problem (other than rate limiting)
+            return res.status(500).json({errors: error.message});
+        }
+        if (error instanceof ServiceError) {
+            // An error at the service layer occurred
             return res.status(500).json({errors: error.message});
         }
     }
