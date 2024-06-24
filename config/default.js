@@ -6,6 +6,9 @@ const config = {
         ipgeolocation: {
             rate: 5,
         },
+        ipapi: {
+            rate: 5,
+        },
     },
 };
 
