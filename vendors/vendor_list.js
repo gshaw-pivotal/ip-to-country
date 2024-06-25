@@ -1,6 +1,8 @@
 const ipgeolocation = require('../vendors/ipgeolocation/convert')
 const ipapi = require('../vendors/ipapi/convert')
 
+const ServiceError = require("../error/service_error");
+
 // List of vendors in the priority order they should be used
 const vendorList = [
     ipgeolocation.convert,
@@ -18,5 +20,5 @@ exports.getVendor = function (index) {
         return vendorList[index];
     }
 
-    throw new Error('No vendor at this index / priority');
+    throw new ServiceError('No vendor at this index / priority');
 }
