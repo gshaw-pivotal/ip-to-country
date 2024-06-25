@@ -17,6 +17,7 @@
     "express-validator": "^7.1.0"
   },
   "devDependencies": {
-    "cjs-mock": "^1.0.15"
+    "cjs-mock": "^1.0.15",
+    "supertest": "^7.0.0"
   }
 }
