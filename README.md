@@ -42,6 +42,57 @@ An example response body is shown below:
 }
 ```
 
+### Error Responses
+It is possible to receive an error response due to different situations:
+
+#### Bad Request
+If you submit a request that fails the request validation checks (missing / invalid request body), you will get a response like the following:
+
+HTTP Status Code: 400 (Bad Request)
+```json
+{
+    "errors": [
+        {
+            "type": "field",
+            "value": "foo",
+            "msg": "Invalid value",
+            "path": "ip",
+            "location": "body"
+        }
+    ]
+}
+```
+
+#### Rate Limit Exceeded
+If the rate limits for all the vendors has been exceeded and the IP address in the request is not in the cache then you will receive the following error response:
+
+HTTP Status Code: 429 (Too Many Requests)
+```json
+{
+    "errors": "Rate limit exceeded, please wait before making another request"
+}
+```
+
+#### Issue with Vendors
+If there is network issues with the vendors or some other problem that prevents all of them from successfully responding to a request sent to them, then you will receive the following error:
+
+HTTP Status Code: 500 (Internal Server Error)
+```json
+{
+    "errors": "General error calling <vendor_name>: <error_message/details>"
+}
+```
+
+#### Issue with the application
+If there is an issue with the application itself, or somehow no vendor completes the request and none of them generate an error, then you will get the following error response:
+
+HTTP Status Code: 500 (Internal Server Error)
+```json
+{
+    "errors": "No vendor was able to successfully complete the request"
+}
+```
+
 ## Cache
 The application has a basic in memory cache that stores each new IP address the application receives along with the country return by a vendor.
 
@@ -76,6 +127,8 @@ A new vendor to provide IP address to country translation can be added by follow
 - Within your subdirectory create a Javascript file named `convert.js` and within that add and export / expose a function called `convert` that takes a string holding the IP address to be translated and will return a string holding the country name that is associated with that IP address. See below for example code skeleton.
 ```js
 exports.convert = async function (ip) {
+    // Implementation logic
+    return '<country_name>';
 }
 ```
 - In `vendor_list.js` add an import to your vendor, similar to the following:
